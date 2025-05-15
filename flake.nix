@@ -55,7 +55,7 @@
 
             taps = [];
             brews = [ "cowsay" ];
-            casks = [ "google-chrome" "whatsapp@beta" "sublime-merge" "joplin" "microsoft-remote-desktop"];
+            casks = [ "google-chrome" "whatsapp@beta" "sublime-merge" "joplin" "microsoft-remote-desktop" "zoom" "docker" "db-browser-for-sqlite"];
         };
 
         # enable touch id when using sudo
@@ -83,6 +83,17 @@
             pkgs.git
             pkgs.git-lfs
             pkgs.warp-terminal
+            pkgs.nodejs_20
+	    pkgs.dotnet-sdk_8
+	   # pkgs.dotnet-sdk
+           # pkgs.docker
+           # pkgs.docker-compose
+           # pkgs.colima
+	    pkgs.grype
+	    pkgs.jq #command line json parser?
+	    pkgs.gitkraken
+	   # pkgs.sqlitebrowser
+	    pkgs.jetbrains.idea-community
         ];
 
         home.sessionVariables = {
@@ -108,6 +119,7 @@
 
         programs.git = {
             enable = true;
+	    lfs.enable = true;
             userName = "Vivek Rathod";
             userEmail = "vrathod@trustwave.com";
             ignores = [ ".DS_Store" ];
@@ -119,7 +131,7 @@
     };
   in
   {
-  darwinConfigurations."MacBook-Pro" = nix-darwin.lib.darwinSystem {
+  darwinConfigurations."FLU-EN-9C973MY" = nix-darwin.lib.darwinSystem {
         modules = [
             configuration
             home-manager.darwinModules.home-manager  {
