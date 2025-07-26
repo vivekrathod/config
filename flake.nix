@@ -2,12 +2,14 @@
   description = "Example nix-darwin system flake";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-25.05-darwin";
-    nix-darwin.url = "github:nix-darwin/nix-darwin/nix-darwin-25.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nix-darwin.url = "github:nix-darwin/nix-darwin/master";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
+    home-manager.url = "github:nix-community/home-manager";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = inputs@{ self, nix-darwin, nixpkgs }:
+  outputs = inputs@{ self, nix-darwin, nixpkgs, home-manager }:
   let
     configuration = { pkgs, ... }: {
      # let determinate manage nix
@@ -34,13 +36,32 @@
 
       # The platform the configuration will be used on.
       nixpkgs.hostPlatform = "aarch64-darwin";
+
+      # needed for home-manager (somehow uses this to decide the home dir and all)
+      users.users.vrathod.home = /Users/vrathod;
     };
   in
   {
     # Build darwin flake using:
     # $ darwin-rebuild build --flake .#FLU-EN-9C973MY
     darwinConfigurations."FLU-EN-9C973MY" = nix-darwin.lib.darwinSystem {
-      modules = [ configuration ];
+      modules = [ 
+	configuration
+	home-manager.darwinModules.home-manager
+            {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              home-manager.users.vrathod = {
+	         home = {
+                   stateVersion = "23.05";
+   	         };
+    	         programs.home-manager.enable = true;
+              };
+
+              # Optionally, use home-manager.extraSpecialArgs to pass
+              # arguments to home.nix
+            }
+      ];
     };
   };
 }
