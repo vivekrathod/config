@@ -40,7 +40,15 @@
       # needed for home-manager (somehow uses this to decide the home dir and all)
       users.users.vrathod.home = /Users/vrathod;
     };
-  in
+    # home-manager config
+    homeconfig = {pkgs, ...}: {
+        # this is internal compatibility configuration 
+        # for home-manager, don't change this!
+        home.stateVersion = "23.05";
+        # Let home-manager install and manage itself.
+        programs.home-manager.enable = true;
+   };
+in
   {
     # Build darwin flake using:
     # $ darwin-rebuild build --flake .#FLU-EN-9C973MY
@@ -51,12 +59,7 @@
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
-              home-manager.users.vrathod = {
-	         home = {
-                   stateVersion = "23.05";
-   	         };
-    	         programs.home-manager.enable = true;
-              };
+              home-manager.users.vrathod = homeconfig; 
 
               # Optionally, use home-manager.extraSpecialArgs to pass
               # arguments to home.nix
