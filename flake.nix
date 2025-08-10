@@ -116,7 +116,12 @@
         programs.ssh = {
           enable = true;
           addKeysToAgent = "yes";
-          useKeychain = true;
+          extraConfig = ''
+            UseKeychain yes
+            IdentityFile ~/.ssh/id_ed25519
+            IdentityFile ~/.ssh/id_ed25519_github_personal
+            IdentityFile ~/.ssh/id_rsa
+          '';
         };
 	  
    	programs.zsh = {
