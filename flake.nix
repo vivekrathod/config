@@ -63,7 +63,12 @@
     };
 
     # home-manager config
-    homeconfig = {pkgs, ...}: {
+    homeconfig = {pkgs, ...}: 
+    let
+      dotnet8Path = "${pkgs.dotnet-sdk_8}/share/dotnet";
+      dotnet9Path = "${pkgs.dotnet-sdk_9}/share/dotnet";
+    in
+    {
         # this is internal compatibility configuration 
         # for home-manager, don't change this!
         home.stateVersion = "23.05";
@@ -86,6 +91,7 @@
             pkgs.git-lfs
             pkgs.warp-terminal
             pkgs.nodejs_20
+	    # Multiple .NET SDK versions (only install one in PATH to avoid conflicts)
 	    pkgs.dotnet-sdk_8
 	   # pkgs.dotnet-sdk
            # pkgs.docker
@@ -100,6 +106,7 @@
 
 	home.sessionVariables = {
             EDITOR = "vim";
+            # Default to .NET 8 - can be overridden with dotnet8/dotnet9 functions
         };
     
         #configure dotfile for config as required
@@ -108,8 +115,63 @@
    	programs.zsh = {
     	   enable = true;
            shellAliases = {
-              switch = "darwin-rebuild switch --flake ~/.config/nix";
+              switch = "sudo darwin-rebuild switch --flake ~/.config/nix";
            };
+           
+           initContent = ''
+             # .NET SDK paths (computed by Nix)
+             DOTNET8_PATH="${dotnet8Path}"
+             DOTNET9_PATH="${dotnet9Path}"
+             
+             # .NET SDK switching functions
+             dotnet8() {
+               if [[ -d "$DOTNET8_PATH" ]]; then
+                 export DOTNET_ROOT="$DOTNET8_PATH"
+                 echo "Switched to .NET SDK 8 (DOTNET_ROOT=$DOTNET_ROOT)"
+                 if command -v dotnet >/dev/null 2>&1; then
+                   dotnet --version
+                 else
+                   echo "Warning: dotnet command not found in PATH"
+                 fi
+               else
+                 echo "Error: .NET SDK 8 not found at $DOTNET8_PATH"
+                 return 1
+               fi
+             }
+             
+             dotnet9() {
+               if [[ -d "$DOTNET9_PATH" ]]; then
+                 export DOTNET_ROOT="$DOTNET9_PATH"
+                 echo "Switched to .NET SDK 9 (DOTNET_ROOT=$DOTNET_ROOT)"
+                 if command -v dotnet >/dev/null 2>&1; then
+                   dotnet --version
+                 else
+                   echo "Warning: dotnet command not found in PATH"
+                 fi
+               else
+                 echo "Error: .NET SDK 9 not found at $DOTNET9_PATH"
+                 return 1
+               fi
+             }
+             
+             # Show current dotnet version and DOTNET_ROOT
+             dotnet-version() {
+               echo "Current DOTNET_ROOT: $DOTNET_ROOT"
+               echo "Available SDK paths:"
+               echo "  .NET 8: $DOTNET8_PATH"
+               echo "  .NET 9: $DOTNET9_PATH"
+               if command -v dotnet >/dev/null 2>&1; then
+                 echo "dotnet --version: $(dotnet --version)"
+                 echo "dotnet --info:"
+                 dotnet --info | head -10
+               else
+                 echo "dotnet command not found in PATH"
+               fi
+             }
+             
+             # Initialize with .NET 8 by default
+             dotnet8 >/dev/null 2>&1
+           '';
 	    
 
            oh-my-zsh = {
