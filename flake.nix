@@ -111,6 +111,13 @@
     
         #configure dotfile for config as required
         home.file.".vimrc".source = ./vim_configuration;
+        
+        # SSH configuration for automatic key loading
+        programs.ssh = {
+          enable = true;
+          addKeysToAgent = "yes";
+          useKeychain = true;
+        };
 	  
    	programs.zsh = {
     	   enable = true;
@@ -172,9 +179,13 @@
                  echo "dotnet command not found in PATH"
                fi
              }
-             
              # Initialize with .NET 8 by default
-             dotnet8 >/dev/null 2>&1
+             dotnet8 > /dev/null 2>&1
+             
+             # Add SSH keys to agent on shell startup
+             ssh-add --apple-use-keychain ~/.ssh/id_ed25519 2>/dev/null || true
+             ssh-add --apple-use-keychain ~/.ssh/id_ed25519_github_personal 2>/dev/null || true
+             ssh-add --apple-use-keychain ~/.ssh/id_rsa 2>/dev/null || true
            '';
 	    
 
