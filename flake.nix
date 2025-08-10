@@ -118,6 +118,22 @@
           addKeysToAgent = "yes";
           extraConfig = ''
             UseKeychain yes
+            
+            # Personal GitHub account (vivekrathod)
+            Host github-personal
+              HostName github.com
+              User git
+              IdentityFile ~/.ssh/id_ed25519_github_personal
+              IdentitiesOnly yes
+            
+            # Work GitHub account (VRathod_TWH) - default github.com
+            Host github.com
+              HostName github.com
+              User git
+              IdentityFile ~/.ssh/id_ed25519
+              IdentitiesOnly yes
+              
+            # Fallback identity files
             IdentityFile ~/.ssh/id_ed25519
             IdentityFile ~/.ssh/id_ed25519_github_personal
             IdentityFile ~/.ssh/id_rsa
