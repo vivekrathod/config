@@ -91,9 +91,8 @@
             pkgs.git-lfs
             pkgs.warp-terminal
             pkgs.nodejs_20
-	    # Multiple .NET SDK versions (only install one in PATH to avoid conflicts)
+	    # Default .NET SDK 8 - use dotnet8()/dotnet9() functions to switch versions
 	    pkgs.dotnet-sdk_8
-	    pkgs.dotnet-sdk_9
 	   # pkgs.dotnet-sdk
            # pkgs.docker
            # pkgs.docker-compose
