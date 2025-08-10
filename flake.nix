@@ -93,6 +93,7 @@
             pkgs.nodejs_20
 	    # Multiple .NET SDK versions (only install one in PATH to avoid conflicts)
 	    pkgs.dotnet-sdk_8
+	    pkgs.dotnet-sdk_9
 	   # pkgs.dotnet-sdk
            # pkgs.docker
            # pkgs.docker-compose
@@ -127,8 +128,10 @@
              dotnet8() {
                if [[ -d "$DOTNET8_PATH" ]]; then
                  export DOTNET_ROOT="$DOTNET8_PATH"
+                 # Remove any existing dotnet from PATH and add the new one
+                 export PATH="$DOTNET8_PATH:$(echo $PATH | sed -E 's|[^:]*dotnet[^:]*:||g')"
                  echo "Switched to .NET SDK 8 (DOTNET_ROOT=$DOTNET_ROOT)"
-                 if command -v dotnet >/dev/null 2>&1; then
+                 if command -v dotnet > /dev/null 2>&1; then
                    dotnet --version
                  else
                    echo "Warning: dotnet command not found in PATH"
@@ -142,8 +145,10 @@
              dotnet9() {
                if [[ -d "$DOTNET9_PATH" ]]; then
                  export DOTNET_ROOT="$DOTNET9_PATH"
+                 # Remove any existing dotnet from PATH and add the new one
+                 export PATH="$DOTNET9_PATH:$(echo $PATH | sed -E 's|[^:]*dotnet[^:]*:||g')"
                  echo "Switched to .NET SDK 9 (DOTNET_ROOT=$DOTNET_ROOT)"
-                 if command -v dotnet >/dev/null 2>&1; then
+                 if command -v dotnet > /dev/null 2>&1; then
                    dotnet --version
                  else
                    echo "Warning: dotnet command not found in PATH"
