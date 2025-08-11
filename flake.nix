@@ -73,6 +73,9 @@
         # for home-manager, don't change this!
         home.stateVersion = "23.05";
         
+        # needed to allow unfree packages like warp-terminal
+        nixpkgs.config.allowUnfree = true;
+        
 	# Let home-manager install and manage itself.
         programs.home-manager.enable = true;
 
@@ -227,6 +230,43 @@
                 init.defaultBranch = "master";
                 push.autoSetupRemote = true;
             };
+        };
+        
+        # Configure Terminal.app font using AppleScript
+        home.activation.configureTerminalFont = {
+          after = [ "writeBoundary" ];
+          before = [ ];
+          data = ''
+            echo "Configuring Terminal.app font..."
+            
+            # Use AppleScript to configure Terminal.app (most reliable method)
+            $DRY_RUN_CMD /usr/bin/osascript -e '
+            tell application "Terminal"
+              # Create or get the NixDev settings set
+              try
+                set mySettings to first settings set whose name is "NixDev"
+              on error
+                set mySettings to (make new settings set with properties {name:"NixDev"})
+              end try
+              
+              # Configure the settings (AppleScript uses 0-65535 for RGB values)
+              tell mySettings
+                set font name to "0xProto Nerd Font Mono"
+                set font size to 14
+                set background color to {0, 0, 0}              # Black background
+                set cursor color to {65535, 65535, 65535}      # White cursor  
+                set normal text color to {52428, 52428, 52428} # Light gray text (204/255 * 65535)
+                set bold text color to {65535, 65535, 65535}   # White bold text
+              end tell
+              
+              # Set as default
+              set default settings to mySettings
+              set startup settings to mySettings
+            end tell'
+            
+            echo "Terminal.app configured with 0xProto Nerd Font Mono 14pt"
+            echo "Profile: NixDev (dark theme with nerd font)"
+          '';
         };
    };
 in
