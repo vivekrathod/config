@@ -51,7 +51,7 @@
 
          taps = [];
          brews = [ "cowsay" ];
-         casks = [ "google-chrome" "whatsapp@beta" "sublime-merge" "joplin" "microsoft-remote-desktop" "zoom" "docker" "db-browser-for-sqlite"];
+         casks = [ "google-chrome" "whatsapp@beta" "sublime-merge" "joplin" "microsoft-remote-desktop" "zoom" "docker" "db-browser-for-sqlite" "discord"];
         };
       
       # required for homebrew enablement - apparently tells homebrew to run under this user
@@ -105,6 +105,11 @@
 	    pkgs.gitkraken
 	   # pkgs.sqlitebrowser
 	    pkgs.jetbrains.idea-community
+	    # Python with common packages
+	    pkgs.python3
+	    pkgs.python3Packages.pip
+	    pkgs.python3Packages.virtualenv
+	    pkgs.python3Packages.setuptools
         ];
 
 	home.sessionVariables = {
