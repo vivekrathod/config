@@ -67,6 +67,8 @@
     let
       dotnet8Path = "${pkgs.dotnet-sdk_8}/share/dotnet";
       dotnet9Path = "${pkgs.dotnet-sdk_9}/share/dotnet";
+      # x64 .NET SDK 8 - will be downloaded and installed at runtime
+      dotnet8X64Path = "$HOME/.dotnet-x64";
     in
     {
         # this is internal compatibility configuration 
@@ -94,8 +96,9 @@
             pkgs.git-lfs
             pkgs.warp-terminal
             pkgs.nodejs_20
-	    # Default .NET SDK 8 - use dotnet8()/dotnet9() functions to switch versions
+	    # Default .NET SDK 8 - use dotnet8()/dotnet9()/dotnet8-x64() functions to switch versions
 	    pkgs.dotnet-sdk_8
+	    # Note: x64 .NET SDK 8 is available via the dotnet8-x64() function
 	   # pkgs.dotnet-sdk
            # pkgs.docker
            # pkgs.docker-compose
@@ -158,6 +161,7 @@
              # .NET SDK paths (computed by Nix)
              DOTNET8_PATH="${dotnet8Path}"
              DOTNET9_PATH="${dotnet9Path}"
+             DOTNET8_X64_PATH="${dotnet8X64Path}"
              
              # .NET SDK switching functions
              dotnet8() {
@@ -194,11 +198,56 @@
                fi
              }
              
+             dotnet8-x64() {
+               # Check if x64 .NET SDK 8 is already installed
+               if [[ ! -d "$DOTNET8_X64_PATH" || ! -f "$DOTNET8_X64_PATH/dotnet" ]]; then
+                 echo "x64 .NET SDK 8 not found. Installing..."
+                 echo "Creating directory: $DOTNET8_X64_PATH"
+                 mkdir -p "$DOTNET8_X64_PATH"
+                 
+                 echo "Downloading and installing .NET SDK 8 x64 for macOS using Microsoft's installer..."
+                 # Use Microsoft's official installer script
+                 local installer_url="https://dot.net/v1/dotnet-install.sh"
+                 local temp_installer="/tmp/dotnet-install.sh"
+                 
+                 if command -v curl >/dev/null 2>&1; then
+                   curl -L "$installer_url" -o "$temp_installer"
+                   chmod +x "$temp_installer"
+                   
+                   # Install .NET SDK 8.0 for x64 architecture
+                   "$temp_installer" --channel 8.0 --architecture x64 --install-dir "$DOTNET8_X64_PATH" --no-path
+                   
+                   rm "$temp_installer"
+                   echo "Installation completed."
+                 else
+                   echo "Error: curl not found. Cannot download .NET SDK installer."
+                   return 1
+                 fi
+               fi
+               
+               if [[ -d "$DOTNET8_X64_PATH" && -f "$DOTNET8_X64_PATH/dotnet" ]]; then
+                 export DOTNET_ROOT="$DOTNET8_X64_PATH"
+                 # Remove any existing dotnet from PATH and add the new one
+                 export PATH="$DOTNET8_X64_PATH:$(echo $PATH | sed -E 's|[^:]*dotnet[^:]*:||g')"
+                 echo "Switched to .NET SDK 8 x64 (DOTNET_ROOT=$DOTNET_ROOT)"
+                 if command -v dotnet > /dev/null 2>&1; then
+                   dotnet --version
+                   echo "Architecture: x86_64 (running under Rosetta 2)"
+                 else
+                   echo "Warning: dotnet command not found in PATH"
+                 fi
+               else
+                 echo "Error: .NET SDK 8 x64 installation failed"
+                 return 1
+               fi
+             }
+             
              # Show current dotnet version and DOTNET_ROOT
              dotnet-version() {
                echo "Current DOTNET_ROOT: $DOTNET_ROOT"
                echo "Available SDK paths:"
-               echo "  .NET 8: $DOTNET8_PATH"
+               echo "  .NET 8 (ARM64): $DOTNET8_PATH"
+               echo "  .NET 8 (x64): $DOTNET8_X64_PATH"
                echo "  .NET 9: $DOTNET9_PATH"
                if command -v dotnet >/dev/null 2>&1; then
                  echo "dotnet --version: $(dotnet --version)"
