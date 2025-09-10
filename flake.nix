@@ -50,8 +50,11 @@
          onActivation.cleanup = "uninstall";
 
          taps = [];
-         brews = [ "cowsay" ];
+         brews = [ "cowsay" "mas" ];
          casks = [ "google-chrome" "whatsapp@beta" "sublime-merge" "joplin" "microsoft-remote-desktop" "zoom" "docker" "db-browser-for-sqlite" "discord"];
+         masApps = {
+           "Perplexity: Ask Anything" = 6714467650;
+         };
         };
       
       # required for homebrew enablement - apparently tells homebrew to run under this user
