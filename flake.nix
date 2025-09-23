@@ -48,10 +48,11 @@
       homebrew = {
          enable = true;
          onActivation.cleanup = "uninstall";
+         onActivation.autoUpdate = true;
 
          taps = [];
          brews = [ "cowsay" "mas" ];
-         casks = [ "google-chrome" "whatsapp@beta" "sublime-merge" "joplin" "microsoft-remote-desktop" "zoom" "docker" "db-browser-for-sqlite" "discord"];
+         casks = [ "google-chrome" "whatsapp@beta" "sublime-merge" "joplin" "microsoft-remote-desktop" "zoom" "docker-desktop" "db-browser-for-sqlite" "discord" "notesnook" "claude"];
          masApps = {
            "Perplexity: Ask Anything" = 6714467650;
          };
@@ -111,6 +112,8 @@
 	    pkgs.gitkraken
 	   # pkgs.sqlitebrowser
 	    pkgs.jetbrains.idea-community
+	    # Database tools
+	    pkgs.dbeaver-bin
 	    # Python with common packages
 	    pkgs.python3
 	    pkgs.python3Packages.pip
@@ -158,6 +161,7 @@
     	   enable = true;
            shellAliases = {
               switch = "sudo darwin-rebuild switch --flake ~/.config/nix";
+              update = "brew upgrade --cask && sudo darwin-rebuild switch --flake ~/.config/nix && echo '✅ System updated: Nix packages, Homebrew packages & casks, and macOS App Store apps'";
            };
            
            initContent = ''
