@@ -69,6 +69,7 @@
     # home-manager config
     homeconfig = {pkgs, ...}: 
     let
+      # .NET paths
       dotnet8Path = "${pkgs.dotnet-sdk_8}/share/dotnet";
       dotnet9Path = "${pkgs.dotnet-sdk_9}/share/dotnet";
       # x64 .NET SDK 8 - will be downloaded and installed at runtime
@@ -99,7 +100,8 @@
             pkgs.git
             pkgs.git-lfs
             pkgs.warp-terminal
-            pkgs.nodejs_20
+            # Node.js version manager - use: fnm install 20, fnm use 22, fnm default 20, etc.
+            pkgs.fnm
 	    # Default .NET SDK 8 - use dotnet8()/dotnet9()/dotnet8-x64() functions to switch versions
 	    pkgs.dotnet-sdk_8
 	    # Note: x64 .NET SDK 8 is available via the dotnet8-x64() function
@@ -165,6 +167,9 @@
            };
            
            initContent = ''
+             # Initialize fnm (Fast Node Manager) for Node.js version management
+             eval "$(fnm env --use-on-cd)"
+             
              # .NET SDK paths (computed by Nix)
              DOTNET8_PATH="${dotnet8Path}"
              DOTNET9_PATH="${dotnet9Path}"
@@ -264,8 +269,8 @@
                  echo "dotnet command not found in PATH"
                fi
              }
-             # Initialize with .NET 8 by default
-             dotnet8 > /dev/null 2>&1
+             # Initialize with .NET 8 x64 by default
+             dotnet8-x64 > /dev/null 2>&1
              
              # Add SSH keys to agent on shell startup
              ssh-add --apple-use-keychain ~/.ssh/id_ed25519 2>/dev/null || true
