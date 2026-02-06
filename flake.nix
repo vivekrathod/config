@@ -560,24 +560,10 @@
             };
         };
         
-        # Configure Terminal.app font using defaults command
-        home.activation.configureTerminalFont = {
-          after = [ "writeBoundary" ];
-          before = [ ];
-          data = ''
-            echo "Configuring Terminal.app font..."
-
-            # Use osascript to set the font on the default profile via AppleScript
-            $DRY_RUN_CMD /usr/bin/osascript -e '
-              tell application "Terminal"
-                set font name of settings set "Basic" to "0xProtoNFM-Regular"
-                set font size of settings set "Basic" to 14
-              end tell
-            '
-
-            echo "Terminal.app configured with 0xProto Nerd Font Mono size 14"
-          '';
-        };
+        # Note: Terminal.app font must be set manually
+        # Go to Terminal > Settings > Profiles > Basic > Font > Change
+        # Select "0xProto Nerd Font Mono" size 14
+        # The font is installed via nerd-fonts in home.packages
    };
 in
   {
