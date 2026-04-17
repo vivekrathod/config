@@ -22,9 +22,6 @@
 	  pkgs.vim
         ];
 
-      # Necessary for using flakes on this system.
-      nix.settings.experimental-features = "nix-command flakes";
-
       # Set Git commit hash for darwin-version.
       system.configurationRevision = self.rev or self.dirtyRev or null;
 
@@ -50,9 +47,9 @@
          onActivation.cleanup = "uninstall";
          onActivation.autoUpdate = true;
 
-         taps = [];
-         brews = [ "cowsay" "mas" "stripe-cli" ];
-         casks = [ "google-chrome" "whatsapp@beta" "sublime-merge" "joplin" "microsoft-remote-desktop" "zoom" "docker-desktop" "db-browser-for-sqlite" "discord" "notesnook" "claude" "xquartz"];
+         taps = [ "steipete/tap" ];
+         brews = [ "cowsay" "mas" "stripe-cli" "steipete/tap/gogcli" "steipete/tap/peekaboo" "rtk" ];
+         casks = [ "google-chrome" "whatsapp@beta" "sublime-merge" "joplin" "microsoft-remote-desktop" "zoom" "docker-desktop" "db-browser-for-sqlite" "discord" "notesnook" "claude" "xquartz" "steipete/tap/codexbar" "cursor" "openclaw" ];
          masApps = {
            "Perplexity: Ask Anything" = 6714467650;
          };
@@ -67,7 +64,7 @@
     };
 
     # home-manager config
-    homeconfig = {pkgs, ...}: 
+    homeconfig = { pkgs, config, ... }:
     let
       # .NET paths
       dotnet8Path = "${pkgs.dotnet-sdk_8}/share/dotnet";
@@ -120,15 +117,23 @@
 	    pkgs.jetbrains.idea-community
 	    # Database tools
 	    pkgs.dbeaver-bin
-	    # Python with common packages
+	    # Python tooling
 	    pkgs.python3
 	    pkgs.python3Packages.pip
 	    pkgs.python3Packages.virtualenv
 	    pkgs.python3Packages.setuptools
+	    pkgs.uv
+	    # PDF/OCR deps for nano-pdf
+	    pkgs."poppler-utils"
+	    pkgs.tesseract
         ];
 
 	home.sessionVariables = {
             EDITOR = "vim";
+            # OPENCLAW_GATEWAY_TOKEN is loaded from ~/.config/secrets.sh (not tracked in git)
+            # Ragnarok Checks Service (x64 engine on Apple Silicon): npm dotnet:checks launcher
+            DOTNET_CHECKS_ROOT = "${config.home.homeDirectory}/.dotnet8-x64";
+            DOTNET_CHECKS_CMD = "${config.home.homeDirectory}/.dotnet8-x64/dotnet";
             # Default to .NET 8 - can be overridden with dotnet8/dotnet9 functions
         };
     
@@ -179,6 +184,9 @@
            };
            
            initContent = ''
+             # Load local secrets (API tokens etc — not tracked in git)
+             [ -f "$HOME/.credentials/secrets.sh" ] && source "$HOME/.credentials/secrets.sh"
+
              # Initialize fnm (Fast Node Manager) for Node.js version management
              eval "$(fnm env --use-on-cd)"
 
@@ -350,8 +358,8 @@
              dotnet10 > /dev/null 2>&1
              
              # Add SSH keys to agent on shell startup
-             ssh-add --apple-use-keychain ~/.ssh/id_ed25519 2>/dev/null || true
-             ssh-add --apple-use-keychain ~/.ssh/id_ed25519_github_personal 2>/dev/null || true
+             ssh-add --apple-use-keychain ~/.ssh/github_personal_ed25519 2>/dev/null || true
+             ssh-add --apple-use-keychain ~/.ssh/github_work_ed25519 2>/dev/null || true
              ssh-add --apple-use-keychain ~/.ssh/id_rsa 2>/dev/null || true
            '';
 	    
@@ -371,6 +379,9 @@
            };
            
            initExtra = ''
+             # Load local secrets (API tokens etc — not tracked in git)
+             [ -f "$HOME/.credentials/secrets.sh" ] && source "$HOME/.credentials/secrets.sh"
+
              # Initialize fnm (Fast Node Manager) for Node.js version management
              eval "$(fnm env --use-on-cd)"
 
@@ -542,8 +553,8 @@
              dotnet10 > /dev/null 2>&1
              
              # Add SSH keys to agent on shell startup
-             ssh-add --apple-use-keychain ~/.ssh/id_ed25519 2>/dev/null || true
-             ssh-add --apple-use-keychain ~/.ssh/id_ed25519_github_personal 2>/dev/null || true
+             ssh-add --apple-use-keychain ~/.ssh/github_personal_ed25519 2>/dev/null || true
+             ssh-add --apple-use-keychain ~/.ssh/github_work_ed25519 2>/dev/null || true
              ssh-add --apple-use-keychain ~/.ssh/id_rsa 2>/dev/null || true
            '';
         };
