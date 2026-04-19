@@ -170,7 +170,25 @@ node --version
 
 ---
 
-## 10. Restore OpenClaw
+## 10. Install OpenClaw CLI
+
+The Homebrew `openclaw` cask (installed in step 6) installs only the **GUI app** (`OpenClaw.app`). The `openclaw` CLI tool is a separate npm package and must be installed manually:
+
+```bash
+npm install -g openclaw@latest
+```
+
+Verify:
+```bash
+which openclaw        # should NOT be under fnm node-versions
+openclaw --version
+```
+
+> **Note:** The CLI is installed into whichever Node version is currently active via fnm. Make sure `fnm default 22` is set before running this (step 9), so the CLI ends up in the right place.
+
+---
+
+## 11. Restore OpenClaw
 
 OpenClaw is installed automatically (via the `openclaw` Homebrew cask in step 6), but its entire configuration — agents, AI provider credentials, WhatsApp/Telegram channels, custom skills, memory, and gateway token — lives in `~/.openclaw` and must be restored from backup.
 
@@ -223,7 +241,7 @@ If you couldn't back up everything, prioritise in this order:
 
 ---
 
-## 11. Restore FileZilla and Remmina
+## 12. Restore FileZilla and Remmina
 
 ```bash
 # FileZilla saved FTP servers
@@ -236,13 +254,13 @@ cp -rp /Volumes/Office/remmina-backup/. ~/.local/share/remmina/
 
 ---
 
-## 12. Restore Personal Documents
+## 13. Restore Personal Documents
 
 `~/.credentials/driver-licenses.txt` is already restored as part of step 7 (it's in the same `credentials-backup` directory). No extra steps needed.
 
 ---
 
-## 13. Manual Steps (Not Yet Automated)
+## 14. Manual Steps (Not Yet Automated)
 
 These aren't managed by nix and need to be set up by hand after restore:
 
