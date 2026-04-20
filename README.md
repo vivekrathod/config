@@ -4,9 +4,29 @@ Steps to fully restore this machine after a reimage. Follow them in order.
 
 ---
 
-## Before You Reimage — Back These Up to the Office Disk
+## Before You Reimage — Back Up to the Office Disk
 
-Run these commands **before** wiping your machine:
+Run the backup script (plug in the Office disk first):
+
+```bash
+bash ~/.config/nix/backup.sh
+```
+
+This covers everything: SSH keys, GPG keys, credentials, Claude Code, Cursor, OpenClaw, FileZilla, Remmina, Docker auth, Joplin, and SOURCE folders that have no git remote. It also checks if your nix config has uncommitted changes and warns you before you wipe.
+
+To preview what will be copied without actually writing anything:
+
+```bash
+bash ~/.config/nix/backup.sh --dry-run
+```
+
+After the script finishes, check `/Volumes/Office/backup-manifest.txt` to confirm everything was captured.
+
+---
+
+### What the script backs up (manual reference)
+
+The commands below are what `backup.sh` runs — kept here for reference if you ever need to copy a single item by hand:
 
 ```bash
 # SSH keys
