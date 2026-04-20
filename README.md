@@ -27,6 +27,15 @@ cp -rp ~/clawd /Volumes/Office/clawd-backup 2>/dev/null || true
 cp -rp ~/clawd-coder /Volumes/Office/clawd-coder-backup 2>/dev/null || true
 cp -rp ~/clawd-travel /Volumes/Office/clawd-travel-backup 2>/dev/null || true
 
+# Claude Code — global settings, custom commands, global CLAUDE.md memory
+cp -rp ~/.claude /Volumes/Office/claude-code-backup
+# Claude Code — MCP server config (separate loose file, contains all MCP server definitions)
+cp ~/.claude.json /Volumes/Office/claude.json.backup
+
+# Cursor — home dir config + Library user settings/keybindings/snippets
+cp -rp ~/.cursor /Volumes/Office/cursor-home-backup
+cp -rp ~/Library/Application\ Support/Cursor/User /Volumes/Office/cursor-user-backup
+
 # FileZilla saved FTP servers
 cp -rp ~/.config/filezilla /Volumes/Office/filezilla-backup
 
@@ -254,19 +263,39 @@ cp -rp /Volumes/Office/remmina-backup/. ~/.local/share/remmina/
 
 ---
 
-## 13. Restore Personal Documents
+## 13. Restore Claude Code & Cursor Config
+
+```bash
+# Claude Code directory — global settings, custom slash commands, global CLAUDE.md memory
+cp -rp /Volumes/Office/claude-code-backup ~/.claude
+
+# Claude Code MCP config — all MCP server definitions (critical!)
+cp /Volumes/Office/claude.json.backup ~/.claude.json
+
+# Cursor home dir config
+cp -rp /Volumes/Office/cursor-home-backup ~/.cursor
+
+# Cursor Library config — settings.json, keybindings.json, snippets
+mkdir -p ~/Library/Application\ Support/Cursor/User
+cp -rp /Volumes/Office/cursor-user-backup/. ~/Library/Application\ Support/Cursor/User/
+```
+
+> **Cursor extensions:** Sign into Settings Sync inside Cursor after launching it — extensions restore automatically from the cloud.
+
+---
+
+## 14. Restore Personal Documents
 
 `~/.credentials/driver-licenses.txt` is already restored as part of step 7 (it's in the same `credentials-backup` directory). No extra steps needed.
 
 ---
 
-## 14. Manual Steps (Not Yet Automated)
+## 15. Manual Steps (Not Yet Automated)
 
 These aren't managed by nix and need to be set up by hand after restore:
 
 - **Terminal.app font:** Terminal → Settings → Profiles → Basic → Font → Change to `0xProto Nerd Font Mono`, size 14
 - **VS Code extensions:** Sign in to the Settings Sync feature (built into VS Code) to restore extensions and settings automatically
-- **Cursor extensions/settings:** Re-install extensions manually or copy `~/Library/Application Support/Cursor/` from a backup
 - **Warp terminal:** Sign in to your Warp account to restore themes and settings
 - **macOS preferences:** Dock layout, Finder settings, trackpad/keyboard settings — reconfigure to taste
 

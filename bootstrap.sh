@@ -228,13 +228,48 @@ run_step_12() {
 }
 
 run_step_13() {
-    step "Step 13 — Manual Steps (cannot be automated)"
+    step "Step 13 — Restore Claude Code & Cursor Config"
+    check_office_disk
+
+    if [[ -d /Volumes/Office/claude-code-backup ]]; then
+        cp -rp /Volumes/Office/claude-code-backup ~/.claude
+        ok "Claude Code config restored to ~/.claude"
+    else
+        warn "No Claude Code backup at /Volumes/Office/claude-code-backup — skipping"
+    fi
+
+    if [[ -f /Volumes/Office/claude.json.backup ]]; then
+        cp /Volumes/Office/claude.json.backup ~/.claude.json
+        ok "Claude Code MCP config restored to ~/.claude.json"
+    else
+        warn "No ~/.claude.json backup at /Volumes/Office/claude.json.backup — skipping"
+    fi
+
+    if [[ -d /Volumes/Office/cursor-home-backup ]]; then
+        cp -rp /Volumes/Office/cursor-home-backup ~/.cursor
+        ok "Cursor home config restored to ~/.cursor"
+    else
+        warn "No Cursor home backup at /Volumes/Office/cursor-home-backup — skipping"
+    fi
+
+    if [[ -d /Volumes/Office/cursor-user-backup ]]; then
+        mkdir -p ~/Library/Application\ Support/Cursor/User
+        cp -rp /Volumes/Office/cursor-user-backup/. ~/Library/Application\ Support/Cursor/User/
+        ok "Cursor user config restored to ~/Library/Application Support/Cursor/User"
+        info "Launch Cursor and sign into Settings Sync to restore extensions"
+    else
+        warn "No Cursor backup at /Volumes/Office/cursor-user-backup — skipping"
+    fi
+}
+
+run_step_14() {
+    step "Step 14 — Manual Steps (cannot be automated)"
     echo ""
     echo "  These require you to do them by hand:"
     echo ""
     echo "  □  Terminal font:   Terminal → Settings → Profiles → Basic → Font → 0xProto Nerd Font Mono, size 14"
     echo "  □  VS Code:         Sign in to Settings Sync (built into VS Code)"
-    echo "  □  Cursor:          Re-install extensions manually"
+    echo "  □  Cursor:          Sign in to Settings Sync to restore extensions"
     echo "  □  Warp:            Sign in to your Warp account"
     echo "  □  macOS prefs:     Dock, Finder, trackpad, keyboard — reconfigure to taste"
     echo ""
@@ -248,7 +283,7 @@ run_step_13() {
 echo -e "\n${BOLD}Mac Bootstrap Script${NC}"
 echo -e "Starting from step ${START_STEP}\n"
 
-ALL_STEPS=(1 2 3 4 5 6 7 8 9 10 11 12 13)
+ALL_STEPS=(1 2 3 4 5 6 7 8 9 10 11 12 13 14)
 
 for s in "${ALL_STEPS[@]}"; do
     if (( s < START_STEP )); then continue; fi
@@ -267,5 +302,6 @@ for s in "${ALL_STEPS[@]}"; do
         11) run_step_11 ;;
         12) run_step_12 ;;
         13) run_step_13 ;;
+        14) run_step_14 ;;
     esac
 done
