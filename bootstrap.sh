@@ -34,21 +34,29 @@ check_office_disk() {
 # PHASE 1 — Runs before Nix or Homebrew exist (steps 1–2)
 # =============================================================================
 
+restore_archive() {
+    local name="$1" dest="$2" label="$3"
+    local archive="/Volumes/Office/${name}.tar.gz"
+    if [[ ! -f "$archive" ]]; then
+        warn "No backup found for $label ($archive) — skipping"
+        return
+    fi
+    mkdir -p "$dest"
+    tar xzf "$archive" -C "$dest" --strip-components=1
+    ok "$label restored"
+}
+
 run_step_1() {
     step "Step 1 — Restore SSH Keys"
     check_office_disk
-    if [[ ! -d /Volumes/Office/.ssh ]]; then
-        die "No .ssh backup found at /Volumes/Office/.ssh"
-    fi
-    mkdir -p ~/.ssh
+    restore_archive "ssh" "$HOME/.ssh" "SSH keys"
     chmod 700 ~/.ssh
-    cp -r /Volumes/Office/.ssh/. ~/.ssh/
     chmod 600 ~/.ssh/github_work_ed25519 \
                ~/.ssh/github_personal_ed25519 \
                ~/.ssh/azure_gitserver_rsa.pem \
                ~/.ssh/id_rsa 2>/dev/null || true
     chmod 644 ~/.ssh/*.pub 2>/dev/null || true
-    ok "SSH keys restored to ~/.ssh"
+    ok "SSH key permissions set"
 }
 
 run_step_2() {
@@ -129,13 +137,9 @@ run_step_6() {
 run_step_7() {
     step "Step 7 — Restore Secrets (~/.credentials)"
     check_office_disk
-    if [[ ! -d /Volumes/Office/credentials-backup ]]; then
-        die "No credentials backup found at /Volumes/Office/credentials-backup"
-    fi
-    cp -rp /Volumes/Office/credentials-backup ~/.credentials
+    restore_archive "credentials" "$HOME/.credentials" "Credentials"
     chmod 700 ~/.credentials
     chmod 600 ~/.credentials/secrets.sh 2>/dev/null || true
-    ok "Credentials restored to ~/.credentials"
 }
 
 run_step_8() {
@@ -165,29 +169,12 @@ run_step_10() {
     step "Step 10 — Restore OpenClaw Config"
     check_office_disk
 
-    # Main config dir
-    if [[ -d /Volumes/Office/openclaw-backup ]]; then
-        cp -rp /Volumes/Office/openclaw-backup ~/.openclaw
-        ok "~/.openclaw restored"
-    else
-        warn "No openclaw backup found at /Volumes/Office/openclaw-backup — skipping"
-    fi
+    restore_archive "openclaw"            "$HOME/.openclaw"                                       "OpenClaw config"
+    restore_archive "openclaw-app-identity" "$HOME/Library/Application Support/OpenClaw/identity" "OpenClaw app identity"
+    chmod 600 ~/Library/Application\ Support/OpenClaw/identity/*.json 2>/dev/null || true
 
-    # App identity (Library)
-    if [[ -d /Volumes/Office/openclaw-app-identity ]]; then
-        mkdir -p ~/Library/Application\ Support/OpenClaw/identity
-        cp -r /Volumes/Office/openclaw-app-identity/. ~/Library/Application\ Support/OpenClaw/identity/
-        chmod 600 ~/Library/Application\ Support/OpenClaw/identity/*.json 2>/dev/null || true
-        ok "OpenClaw app identity restored"
-    fi
-
-    # Agent workspaces
     for workspace in clawd clawd-coder clawd-travel; do
-        backup="/Volumes/Office/${workspace}-backup"
-        if [[ -d "$backup" ]]; then
-            cp -rp "$backup" ~/"$workspace"
-            ok "~/$workspace restored"
-        fi
+        restore_archive "$workspace" "$HOME/$workspace" "OpenClaw workspace (~/$workspace)"
     done
 
     info "Launch OpenClaw.app to verify. Google Gemini OAuth may prompt re-auth."
@@ -210,56 +197,27 @@ run_step_11() {
 run_step_12() {
     step "Step 12 — Restore FileZilla & Remmina"
     check_office_disk
-
-    if [[ -d /Volumes/Office/filezilla-backup ]]; then
-        cp -rp /Volumes/Office/filezilla-backup ~/.config/filezilla
-        ok "FileZilla config restored to ~/.config/filezilla"
-    else
-        warn "No FileZilla backup at /Volumes/Office/filezilla-backup — skipping"
-    fi
-
-    if [[ -d /Volumes/Office/remmina-backup ]]; then
-        mkdir -p ~/.local/share/remmina
-        cp -rp /Volumes/Office/remmina-backup/. ~/.local/share/remmina/
-        ok "Remmina connections restored to ~/.local/share/remmina"
-    else
-        warn "No Remmina backup at /Volumes/Office/remmina-backup — skipping"
-    fi
+    restore_archive "filezilla" "$HOME/.config/filezilla"      "FileZilla config"
+    restore_archive "remmina"   "$HOME/.local/share/remmina"   "Remmina RDP connections"
 }
 
 run_step_13() {
     step "Step 13 — Restore Claude Code & Cursor Config"
     check_office_disk
 
-    if [[ -d /Volumes/Office/claude-code-backup ]]; then
-        cp -rp /Volumes/Office/claude-code-backup ~/.claude
-        ok "Claude Code config restored to ~/.claude"
+    restore_archive "claude-code"  "$HOME/.claude"                                        "Claude Code dir"
+    restore_archive "cursor-home"  "$HOME/.cursor"                                        "Cursor home config"
+    restore_archive "cursor-user"  "$HOME/Library/Application Support/Cursor/User"        "Cursor Library settings"
+
+    # claude.json is a single file, not an archive
+    if [[ -f /Volumes/Office/claude.json ]]; then
+        cp /Volumes/Office/claude.json ~/.claude.json
+        ok "Claude MCP config restored to ~/.claude.json"
     else
-        warn "No Claude Code backup at /Volumes/Office/claude-code-backup — skipping"
+        warn "No claude.json backup found — skipping"
     fi
 
-    if [[ -f /Volumes/Office/claude.json.backup ]]; then
-        cp /Volumes/Office/claude.json.backup ~/.claude.json
-        ok "Claude Code MCP config restored to ~/.claude.json"
-    else
-        warn "No ~/.claude.json backup at /Volumes/Office/claude.json.backup — skipping"
-    fi
-
-    if [[ -d /Volumes/Office/cursor-home-backup ]]; then
-        cp -rp /Volumes/Office/cursor-home-backup ~/.cursor
-        ok "Cursor home config restored to ~/.cursor"
-    else
-        warn "No Cursor home backup at /Volumes/Office/cursor-home-backup — skipping"
-    fi
-
-    if [[ -d /Volumes/Office/cursor-user-backup ]]; then
-        mkdir -p ~/Library/Application\ Support/Cursor/User
-        cp -rp /Volumes/Office/cursor-user-backup/. ~/Library/Application\ Support/Cursor/User/
-        ok "Cursor user config restored to ~/Library/Application Support/Cursor/User"
-        info "Launch Cursor and sign into Settings Sync to restore extensions"
-    else
-        warn "No Cursor backup at /Volumes/Office/cursor-user-backup — skipping"
-    fi
+    info "Launch Cursor and sign into Settings Sync to restore extensions"
 }
 
 run_step_14() {
