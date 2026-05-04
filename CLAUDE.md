@@ -38,14 +38,12 @@ homebrew = {
 Located in the `homeconfig` block under `home.packages`:
 - Nerd fonts, oh-my-zsh, neofetch
 - Development tools: vim, vscode, git, gh, fnm
-- .NET SDKs with version switching functions
 - Python, JetBrains IDEA, DBeaver, etc.
 
 ## Shell Configuration
 
 Both zsh and bash are configured with:
 - **Aliases:** `switch`, `update`, `claude`
-- **.NET SDK switching:** `dotnet8`, `dotnet9`, `dotnet10`, `dotnet8-x64`, `dotnet10-x64`
 - **fnm** for Node.js version management
 - **SSH keys** auto-loaded on shell startup
 
@@ -58,11 +56,6 @@ switch                  # alias for: sudo darwin-rebuild switch --flake ~/.confi
 # Update everything (Homebrew + Nix)
 update                  # upgrades casks and runs switch
 
-# Switch .NET versions
-dotnet8                 # ARM64 .NET 8
-dotnet10                # ARM64 .NET 10 (default)
-dotnet8-x64             # x64 .NET 8 (Rosetta)
-dotnet10-x64            # x64 .NET 10 (Rosetta)
 ```
 
 ## Adding Packages
